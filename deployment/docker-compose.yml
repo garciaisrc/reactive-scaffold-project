@@ -1,0 +1,32 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres-db
+    environment:
+      POSTGRES_DB: ReactiveDB
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  autcrediya:
+    build:
+      context: ../applications/app-service
+      dockerfile: ../../deployment/Dockerfile
+    container_name: autcrediya-service
+    environment:
+      SPRING_R2DBC_URL: r2dbc:postgresql://postgres:5432/ReactiveDB
+      SPRING_R2DBC_USERNAME: postgres
+      SPRING_R2DBC_PASSWORD: 1234
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      - postgres
+    ports:
+      - "8081:8081"
+
+volumes:
+  postgres_data:
